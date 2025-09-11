@@ -1,4 +1,0 @@
-gamsapi[control]==50.1.0
-gamspy_base==50.1.0
-streamlit==1.46.1
-plotly==6.3.0
