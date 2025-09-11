@@ -8,7 +8,7 @@ The optimization problems are modeled and solved using either GAMSPy or GAMS con
 
 ## Usage
 
-The `requirements.txt` file contains all the necessary package required to run the streamlit application locally or test the models directly.
+The [requirements.txt](https://github.com/GAMS-dev/gams-streamlit/blob/gams-live/requirements.txt) in the `gams-live` branch contains packages specific to applications that use **GAMS control API** and similarly the [requirements.txt](https://github.com/GAMS-dev/gams-streamlit/blob/gamspy-live/requirements.txt) in the `gamspy-live` branch contains packages specific to applications using **GAMSPy**. This is important because streamlit requires the `requirements.txt` file to be present in the root of the project.
 
 To install the packages run,
 
@@ -29,7 +29,6 @@ You can also run the standalone model from the `src` directory by,
 ```bash
 python <src-name>.py
 ```
-
 Following is the list of examples that are available in the streamlit community.
 
 ## Streamlit applications
