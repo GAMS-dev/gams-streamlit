@@ -8,7 +8,8 @@ build the master and pricing problems. The logic of the column
 generation method is in the application program.
 """
 
-import sys
+import importlib.util
+import os
 from gams import GamsModifier, GamsWorkspace
 
 GAMS_MASTER_MODEL = """
@@ -95,9 +96,13 @@ def cutStockModel(
         r: raw width
         max_pattern
     """
-    sys_dir = sys.argv[1] if len(sys.argv) > 1 else None
-    work_dir = sys.argv[2] if len(sys.argv) > 2 else None
-    ws = GamsWorkspace(system_directory=sys_dir, working_directory=work_dir)
+    spec = importlib.util.find_spec("gamspy_base")
+    if spec and spec.origin:
+        sys_dir = os.path.dirname(spec.origin)
+    else:
+        raise Exception(">gamspy_base< not found! Quiting.")
+
+    ws = GamsWorkspace(system_directory=sys_dir)
 
     opt = ws.add_options()
     cutstock_data = ws.add_database("csdata")
