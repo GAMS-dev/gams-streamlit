@@ -13,9 +13,13 @@ from folium.plugins import AntPath, Fullscreen, MarkerCluster
 from src.tsp import tspModel
 
 
-st.set_page_config(layout="wide", page_title="TSP Solver", initial_sidebar_state="expanded")
+st.set_page_config(
+    layout="wide", page_title="TSP Solver", initial_sidebar_state="expanded"
+)
 
-filepath = Path.cwd() / "data" / "available_countries.json"
+filepath = (
+    Path.cwd() / "traveling-salesman-problem" / "data" / "available_countries.json"
+)
 with open(filepath, "r") as fp:
     LIST_OF_COUNTRIES = json.load(fp)
 
@@ -296,7 +300,7 @@ def main():
 
         with btn1:
             run_opt = st.button("Run Optimization", type="primary")
-        
+
         with btn2:
             st.button("Reset solver", type="secondary", on_click=reset_city_data)
 
@@ -341,6 +345,7 @@ def main():
         country_map = plot_solution(city_df, country_centroid, start_city, path=path)
         with st.spinner("Plotting solution path..."):
             st_folium(country_map, use_container_width=True, height=700)
+
 
 if __name__ == "__main__":
     main()

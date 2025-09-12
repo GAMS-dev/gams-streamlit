@@ -256,5 +256,6 @@ def main():
         st.markdown("## List of Products")
         st.dataframe(st.session_state["stock_df"])
 
+
 if __name__ == "__main__":
     main()
