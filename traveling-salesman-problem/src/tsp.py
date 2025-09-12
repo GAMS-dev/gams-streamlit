@@ -35,7 +35,9 @@ def tspModel(
     k = gp.Alias(m, name="k", alias_with=i)
 
     edges = gp.Set(m, name="allowed_arcs", domain=[n1, n2])
-    distance = gp.Parameter(m, name="distance_matrix", domain=[n1, n2], records=distance_recs)
+    distance = gp.Parameter(
+        m, name="distance_matrix", domain=[n1, n2], records=distance_recs
+    )
 
     i[n1].where[gp.Ord(n1) <= maxnodes] = True
     edges[n1, n2].where[(gp.Ord(n1) > gp.Ord(n2)) & i[n1] & j[n2]] = True
@@ -130,7 +132,7 @@ def main():
         diff = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]
         dist_matrix = np.sqrt(np.sum(diff**2, axis=-1))
         return dist_matrix
-    
+
     filepath = Path(__file__).parent.parent / "data" / "germany_cities.json"
     with open(filepath, "r") as fp:
         city_data = json.load(fp)
