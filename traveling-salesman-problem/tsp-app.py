@@ -130,7 +130,13 @@ def solve_tsp(city_df, distance_df, **config):
         sol_list, model = tspModel(city_df, distance_df, maxnodes=config["maxnodes"])
         st.session_state["sol"], time_taken = sol_list
     except Exception as e:
-        raise Exception(e)
+        if e.return_code == 7:
+            st.error(
+                "Solver returned with status: LicenseError. This might mean you have exceeded the Demo License limit."
+            )
+            return
+        else:
+            raise Exception(e)
 
     if model.solve_status.value not in [1, 2, 3, 5, 8]:
         st.error(
@@ -188,9 +194,10 @@ def prepInput():
         number_of_cities = st.number_input(
             "Number of cities to consider for TSP",
             min_value=1,
-            max_value=100,
+            max_value=63,
             value=10,
             on_change=reset_city_data,
+            help="More than 63 cities exceed the demo license limitation."
         )
 
         if selected_country:
