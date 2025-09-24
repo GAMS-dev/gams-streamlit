@@ -1,6 +1,6 @@
 # GAMS-Streamlit
 
-This repository contains streamlit applications for various optimization problems. 
+This repository contains streamlit applications for various optimization problems.
 
 ## Modeling
 
@@ -21,20 +21,21 @@ You can then run the streamlit application locally by,
 ```bash
 streamlit run <app-name>.py
 ```
-The application should be available at http://localhost:8501
 
+The application should be available at <http://localhost:8501>
 
 You can also run the standalone model from the `src` directory by,
 
 ```bash
 python <src-name>.py
 ```
+
 Following is the list of examples that are available in the streamlit community.
 
 ## Streamlit applications
 
-
-| Problem            | Streamlit App                                                                | Model                                             | Backend          |
-| ------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------- | ---------------- |
-| Cutting stock      | [https://gams-cutstock.streamlit.app/](https://gams-cutstock.streamlit.app/) | [cutstock.py](./cutstock-problem/src/cutstock.py) | GAMS control API |
-| Traveling Salesman | [https://gamspy-tsp.streamlit.app/](https://gamspy-tsp.streamlit.app/)       | [tsp.py](./traveling-salesman-problem/src/tsp.py) | GAMSPy           |
+| # | Problem            | Streamlit App                                                                      | Model                                                            | Backend          |
+| - | ------------------ | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------- |
+| 1 | Cutting stock      | [https://gams-cutstock.streamlit.app/](https://gams-cutstock.streamlit.app/)       | [cutstock.py](./cutstock-problem/src/cutstock.py)         | GAMS control API |
+| 2 | Traveling Salesman | [https://gamspy-tsp.streamlit.app/](https://gamspy-tsp.streamlit.app/)             | [tsp.py](./traveling-salesman-problem/src/tsp.py)                 | GAMSPy           |
+| 3 | Transportation     | [https://gamspy-transport.streamlit.app/](https://gamspy-transport.streamlit.app/) | [transport.py](./transportation-problem/src/transport.py) | GAMSPy           |
