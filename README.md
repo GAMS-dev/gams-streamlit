@@ -29,6 +29,9 @@ You can also run the standalone model from the `src` directory by,
 ```bash
 python <src-name>.py
 ```
+## Demo License
+
+The applications run on a Demo License which has a limit of 2000 variables and constraints.
 
 Following is the list of examples that are available in the streamlit community.
 
