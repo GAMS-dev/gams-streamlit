@@ -16,15 +16,25 @@ st.set_page_config(
     layout="wide", page_title="Transportation Problem", initial_sidebar_state="expanded"
 )
 
-# filepath = Path.cwd() / "transportation-problem" / "data" / "us_cities_100.json" # for when you upload on streamlit
-filepath = Path.cwd() / "data" / "us_cities_100.json"
+if "all_city_data" not in st.session_state:
+    potential_paths = [
+        Path.cwd()
+        / "transportation-problem"
+        / "data"
+        / "us_cities_100.json",  # for streamlit
+        Path.cwd() / "data" / "us_cities_100.json",  # local runs
+    ]
+    for i, path in enumerate(potential_paths):
+        filepath = path if path.exists() else None
 
-with open(filepath, "r") as fp:
-    city_data = json.load(fp)
-    ALL_CITY_DF = pd.DataFrame.from_dict(
-        city_data, orient="index", columns=["Latitude", "Longitude"]
-    ).reset_index()
-    st.session_state["list_of_cities"] = ALL_CITY_DF["index"].values.tolist()
+    if filepath is None:
+        raise FileNotFoundError("us_cities_100.json not found in either path")
+
+    with open(filepath, "r") as fp:
+        city_data = json.load(fp)
+        st.session_state["all_city_data"] = pd.DataFrame.from_dict(
+            city_data, orient="index", columns=["Latitude", "Longitude"]
+        ).reset_index()
 
 DEFAULTS = {
     "solutionFound": False,
@@ -48,9 +58,15 @@ def getEntities(suppliers, markets):
     return list_of_suppliers_and_markets
 
 
-DEFAULTS["city_df"] = ALL_CITY_DF.loc[
-    ALL_CITY_DF["index"].isin(getEntities(DEFAULTS["suppliers"], DEFAULTS["markets"]))
-].reset_index(drop=True)
+DEFAULTS["filtered_city_df"] = (
+    st.session_state["all_city_data"]
+    .loc[
+        st.session_state["all_city_data"]["index"].isin(
+            getEntities(DEFAULTS["suppliers"], DEFAULTS["markets"])
+        )
+    ]
+    .reset_index(drop=True)
+)
 
 for key, val in DEFAULTS.items():
     if key not in st.session_state:
@@ -116,7 +132,7 @@ def reset_solution():
 def add_entities():
     reset_solution()
 
-    list_of_all_cities = set(st.session_state["list_of_cities"])
+    list_of_all_cities = set(st.session_state["all_city_data"]["index"].values.tolist())
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
 
@@ -163,7 +179,7 @@ def edit_entities():
 
     list_of_suppliers_and_markets = getEntities(suppliers, markets)
     edit_city = st.selectbox(
-        label="Select one or more items",
+        label="Select a city to edit",
         options=list_of_suppliers_and_markets,
         index=0,
         placeholder="Type or Select a city to edit...",
@@ -194,7 +210,7 @@ def remove_entities():
 
     list_of_suppliers_and_markets = getEntities(suppliers, markets)
     remove_cities = st.multiselect(
-        label="Select one or more items",
+        label="Select one or more cities",
         default=None,
         max_selections=(len(list_of_suppliers_and_markets) - 1),
         options=list_of_suppliers_and_markets,
@@ -218,11 +234,15 @@ def remove_entities():
 
 
 def update_city_df():
-    st.session_state["city_df"] = ALL_CITY_DF.loc[
-        ALL_CITY_DF["index"].isin(
-            getEntities(st.session_state["suppliers"], st.session_state["markets"])
-        )
-    ].reset_index(drop=True)
+    st.session_state["filtered_city_df"] = (
+        st.session_state["all_city_data"]
+        .loc[
+            st.session_state["all_city_data"]["index"].isin(
+                getEntities(st.session_state["suppliers"], st.session_state["markets"])
+            )
+        ]
+        .reset_index(drop=True)
+    )
 
 
 def prepInput():
@@ -244,6 +264,7 @@ def prepInput():
             value=90,
             step=1,
             on_change=reset_solution,
+            help="The cost per unit of shipment between plant `i` and market `j` is derived from `freight_cost * distance(i,j) / 1000`"
         )
 
     return freight_cost
@@ -256,7 +277,7 @@ def euclidean_distance_matrix(coords):
     return dist_matrix
 
 
-def plot_solution(city_df: pd.DataFrame, sol):
+def plot_solution(filtered_city_df: pd.DataFrame, sol):
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
     country_map = folium.Map(
@@ -264,7 +285,7 @@ def plot_solution(city_df: pd.DataFrame, sol):
     )  # center to USA
 
     marker_cluster = MarkerCluster().add_to(country_map)
-    for name, lat, long in city_df.itertuples(index=False, name=None):
+    for name, lat, long in filtered_city_df.itertuples(index=False, name=None):
         if name in suppliers["Name"].values.tolist():
             # supplier markers
             folium.Marker(
@@ -283,8 +304,12 @@ def plot_solution(city_df: pd.DataFrame, sol):
     if sol is not None:
         max_level = max(sol.level)
         for i, j, level in sol.itertuples(index=False):
-            selection_i = city_df[city_df["index"] == i][["Latitude", "Longitude"]]
-            selection_j = city_df[city_df["index"] == j][["Latitude", "Longitude"]]
+            selection_i = filtered_city_df[filtered_city_df["index"] == i][
+                ["Latitude", "Longitude"]
+            ]
+            selection_j = filtered_city_df[filtered_city_df["index"] == j][
+                ["Latitude", "Longitude"]
+            ]
             combined_df = pd.concat([selection_i, selection_j], ignore_index=True)
             weight = level * 8 / max_level
 
@@ -314,15 +339,17 @@ def main():
     freight_cost = prepInput()
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
-    city_df = st.session_state["city_df"]
+    filtered_city_df = st.session_state["filtered_city_df"]
 
     col1, col2 = st.columns(2)
     with col1:
-        st.write("List of Suppliers")
+        st.markdown("### List of Suppliers")
         st.dataframe(suppliers)
+        st.write(f"Total supplier capacity: **{suppliers.Capacity.sum()}**")
     with col2:
-        st.write("List of Markets")
+        st.markdown("### List of Markets")
         st.dataframe(markets)
+        st.write(f"Total market demand: **{markets.Demand.sum()}**")
 
     with st.sidebar:
         st.divider()
@@ -344,10 +371,10 @@ def main():
     output_placeholder = st.empty()
     if run_opt:
         dist_mat = euclidean_distance_matrix(
-            city_df[["Latitude", "Longitude"]].to_numpy()
+            filtered_city_df[["Latitude", "Longitude"]].to_numpy()
         )
         dist_df = pd.DataFrame(
-            dist_mat, index=city_df["index"], columns=city_df["index"]
+            dist_mat, index=filtered_city_df["index"], columns=filtered_city_df["index"]
         )
         distance_df = dist_df.reset_index().melt(
             id_vars="index", var_name="to_city", value_name="Euclidean distance"
@@ -359,7 +386,7 @@ def main():
 
         with st.spinner("Transporting goods, meeting demands 🚚..."):
             output_placeholder.empty()
-            if len(city_df) <= 1:
+            if len(filtered_city_df) <= 1:
                 raise Exception("Select at least one supplier and a market.")
             solve_transport(
                 capacities=list(suppliers.itertuples(index=False, name=None)),
@@ -368,14 +395,15 @@ def main():
                 freight_cost=freight_cost,
             )
 
-    country_map = plot_solution(city_df, sol=st.session_state["sol"])
-
-    with st.spinner("Plotting solution path..."):
-        st_folium(country_map, use_container_width=True, height=700)
-
     if st.session_state["solutionFound"]:
         with output_placeholder.container():
-            st.toast("Solution Found!", icon="✅")
+            status = st.session_state["stats"].loc["Status"].values[0]
+            if status == "OptimalGlobal":
+                st.success("Optimal solution found!", icon="✅")
+            elif status == "InfeasibleGlobal":
+                st.error("Model infeasible!", icon="❌")
+            else:
+                st.info(f"Model status is {status}", icon="ℹ️")
             st.markdown("### Total Cost:")
             st.markdown(
                 f"$ {st.session_state['obj_val']}",
@@ -384,6 +412,10 @@ def main():
             st.dataframe(st.session_state["stats"])
     else:
         output_placeholder.empty()
+
+    country_map = plot_solution(filtered_city_df, sol=st.session_state["sol"])
+    with st.spinner("Plotting solution..."):
+        st_folium(country_map, use_container_width=True, height=700)
 
 
 if __name__ == "__main__":
