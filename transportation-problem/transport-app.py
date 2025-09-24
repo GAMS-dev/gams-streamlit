@@ -17,8 +17,9 @@ st.set_page_config(
 )
 
 if "all_city_data" not in st.session_state:
-        
-    filepath = Path.cwd() / "transportation-problem" / "data" / "us_cities_100.json"  # for streamlit
+    filepath = (
+        Path.cwd() / "transportation-problem" / "data" / "us_cities_100.json"
+    )  # for streamlit
     # filepath = Path.cwd() / "data" / "us_cities_100.json",  # local runs or run from root directory
     with open(filepath, "r") as fp:
         city_data = json.load(fp)
@@ -254,7 +255,7 @@ def prepInput():
             value=90,
             step=1,
             on_change=reset_solution,
-            help="The cost per unit of shipment between plant `i` and market `j` is derived from `freight_cost * distance(i,j) / 1000`"
+            help="The cost per unit of shipment between plant `i` and market `j` is derived from `freight_cost * distance(i,j) / 1000`",
         )
 
     return freight_cost
