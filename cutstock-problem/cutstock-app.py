@@ -45,7 +45,6 @@ def reset_solution():
 
 @st.dialog("Remove products")
 def remove_products():
-    reset_solution()
     stock_df: pd.DataFrame = st.session_state["stock_df"]
     remove_items = st.multiselect(
         label="Select one or more items",
@@ -58,12 +57,12 @@ def remove_products():
         st.session_state["stock_df"] = stock_df.loc[
             ~stock_df["ID"].isin(remove_items)
         ].reset_index(drop=True)
+        reset_solution()
         st.rerun()
 
 
 @st.dialog("Enter Info")
 def add_more_products():
-    reset_solution()
     stock_df = st.session_state["stock_df"]
     product_name = st.text_input(
         label="product ID", value=f"Item{len(stock_df) + 1}", max_chars=20
@@ -75,6 +74,7 @@ def add_more_products():
         st.session_state["stock_df"] = pd.concat(
             [stock_df, pd.DataFrame([new_row])], ignore_index=True
         )
+        reset_solution()
         st.rerun()
 
 
@@ -258,4 +258,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(e)
