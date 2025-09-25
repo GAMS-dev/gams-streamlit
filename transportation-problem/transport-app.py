@@ -80,10 +80,9 @@ def solve_transport(capacities, demands, distance, freight_cost):
         st.session_state["sol"] = solution
     except Exception as e:
         if e.return_code == 7:
-            st.error(
+            raise Exception(
                 "Solver returned with status: LicenseError. This might mean you have exceeded the Demo License limit."
             )
-            return
         else:
             raise Exception(e)
 
@@ -127,8 +126,6 @@ def reset_solution():
 
 @st.dialog("Add new entities")
 def add_entities():
-    reset_solution()
-
     list_of_all_cities = set(st.session_state["all_city_data"]["index"].values.tolist())
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
@@ -165,12 +162,12 @@ def add_entities():
                 [st.session_state["markets"], pd.DataFrame([new_row])],
                 ignore_index=True,
             )
+        reset_solution()
         st.rerun()
 
 
 @st.dialog("Edit entities")
 def edit_entities():
-    reset_solution()
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
 
@@ -196,12 +193,12 @@ def edit_entities():
     if st.button("Update"):
         st.session_state["suppliers"] = suppliers
         st.session_state["markets"] = markets
+        reset_solution()
         st.rerun()
 
 
 @st.dialog("Remove entities")
 def remove_entities():
-    reset_solution()
     suppliers = st.session_state["suppliers"]
     markets = st.session_state["markets"]
 
@@ -227,6 +224,7 @@ def remove_entities():
         st.session_state["markets"] = markets.loc[
             ~markets["Name"].isin(remove_market)
         ].reset_index(drop=True)
+        reset_solution()
         st.rerun()
 
 
@@ -317,7 +315,7 @@ def plot_solution(filtered_city_df: pd.DataFrame, sol):
                 dash_array=[20, 30],
                 weight=weight,
                 opacity=0.8,
-                tooltip=f"level: {level}",
+                tooltip=f"Level: {level}",
             ).add_to(country_map)
 
     Fullscreen(
@@ -416,4 +414,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(e)
