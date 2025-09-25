@@ -80,10 +80,9 @@ def solve_transport(capacities, demands, distance, freight_cost):
         st.session_state["sol"] = solution
     except Exception as e:
         if e.return_code == 7:
-            st.error(
+            raise Exception(
                 "Solver returned with status: LicenseError. This might mean you have exceeded the Demo License limit."
             )
-            return
         else:
             raise Exception(e)
 
@@ -416,4 +415,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(e)

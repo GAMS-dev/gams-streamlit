@@ -98,18 +98,18 @@ def fetchCities(country):
         "config": "default",
         "split": "train",
         "where": f"country='{country}'",
-        "length": 100,
+        "length": 63,
     }
 
     response = requests.get(base_url, params=params)
     if response.status_code != 200:
-        st.error("Something went wrong while fetching the cities.")
+        raise Exception("Something went wrong while fetching the cities.")
 
     url = f"https://services9.arcgis.com/l9yXFvhjz46ekkZV/arcgis/rest/services/Countries_Centroids/FeatureServer/0/query?where=COUNTRY+%3D+%27{country}%27&outFields=*&f=pgeojson"
 
     country_center = requests.get(url)
     if country_center.status_code != 200:
-        st.error(
+        raise Exception(
             "Something went wrong while fetching coordinates for the selected country."
         )
 
@@ -131,18 +131,17 @@ def solve_tsp(city_df, distance_df, **config):
         st.session_state["sol"], time_taken = sol_list
     except Exception as e:
         if e.return_code == 7:
-            st.error(
-                "Solver returned with status: LicenseError. This might mean you have exceeded the Demo License limit."
+            raise Exception(
+                "Solver returned with status: *LicenseError*. This means you have exceeded the Demo License limit."
             )
-            return
         else:
             raise Exception(e)
 
     if model.solve_status.value not in [1, 2, 3, 5, 8]:
-        st.error(
+        st.session_state["solutionFound"] = False
+        raise Exception(
             f"Solution not found. Solver returned with status: {model.solve_status}"
         )
-        st.session_state["solutionFound"] = False
     else:
         st.session_state["solutionFound"] = True
         obj_val = round(model.objective_value * 100, 2)  # scale km
@@ -187,7 +186,7 @@ def prepInput():
             LIST_OF_COUNTRIES,
             index=None,
             placeholder="Type or select a country..",
-            help="This tries to fetch 100 cities with their geolocation data from a Kaggle dataset",
+            help="This tries to fetch 63 cities with their geolocation data from a Kaggle dataset",
             on_change=reset_city_data,
         )
 
@@ -195,9 +194,9 @@ def prepInput():
             "Number of cities to consider for TSP",
             min_value=1,
             max_value=63,
-            value=10,
+            value=5,
             on_change=reset_city_data,
-            help="More than 63 cities exceed the demo license limitation."
+            help="More than 63 cities exceed the demo license limitation.",
         )
 
         if selected_country:
@@ -216,7 +215,7 @@ def prepInput():
                     st.session_state["city_df"] = city_df
                 except ValueError:
                     raise Exception(
-                        "Maximum nodes is greater than number of cities available. Reduce maximum number of nodes."
+                        f"Number of cities selected, ({number_of_cities}) is greater than number of cities available, ({len(city_df)}). Reduce the number of cities to solve the TSP for."
                     )
 
         startCity = st.selectbox(
@@ -298,6 +297,9 @@ def main():
     st.title("GAMSPy TSP Solver")
 
     config = prepInput()
+    if config is None:
+        raise Exception("Wrong Input")
+
     city_df: pd.DataFrame = st.session_state["city_df"]
     start_city = config["start_city"]
 
@@ -330,7 +332,7 @@ def main():
             with st.spinner("Solving TSP with DFJ formulation..."):
                 output_placeholder.empty()
                 if city_df.empty:
-                    raise Exception("Select a country first")
+                    raise Exception("Select a country first!")
                 solve_tsp(city_df, distance_df, **config)
 
         if st.session_state["solutionFound"]:
@@ -355,4 +357,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(e)
