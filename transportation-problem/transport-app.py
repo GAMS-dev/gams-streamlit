@@ -13,7 +13,7 @@ from src.transport import transport_model
 
 
 st.set_page_config(
-    layout="wide", page_title="Transportation Problem", initial_sidebar_state="expanded"
+    layout="wide", page_title="Transportation Problem", initial_sidebar_state="expanded", page_icon="🚚"
 )
 
 if "all_city_data" not in st.session_state:
