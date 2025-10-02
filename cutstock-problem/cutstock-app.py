@@ -7,7 +7,7 @@ import plotly.colors
 from src.cutstock import cutStockModel
 
 st.set_page_config(
-    layout="wide", page_title="CutStock Solver", initial_sidebar_state="expanded"
+    layout="wide", page_title="CutStock Solver", initial_sidebar_state="expanded", page_icon="✂️"
 )
 
 
