@@ -14,7 +14,7 @@ from src.tsp import tspModel
 
 
 st.set_page_config(
-    layout="wide", page_title="TSP Solver", initial_sidebar_state="expanded"
+    layout="wide", page_title="TSP Solver", initial_sidebar_state="expanded", page_icon="🚶"
 )
 
 filepath = (
