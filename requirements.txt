@@ -1,4 +1,4 @@
-gamspy==1.12.1
+gamspy
 networkx==3.5
 folium==0.20.0
 streamlit==1.46.1
