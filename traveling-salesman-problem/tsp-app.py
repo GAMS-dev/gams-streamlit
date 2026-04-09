@@ -97,7 +97,7 @@ def fetchCities(country):
         "dataset": "jamescalam/world-cities-geo",
         "config": "default",
         "split": "train",
-        "where": f"country='{country}'",
+        "where": f'"country"=\'{country}\'',
         "length": 63,
     }
 
