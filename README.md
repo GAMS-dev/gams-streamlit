@@ -42,3 +42,5 @@ Following is the list of examples that are available in the streamlit community.
 | 1 | Cutting stock      | [https://gams-cutstock.streamlit.app/](https://gams-cutstock.streamlit.app/)       | [cutstock.py](./cutstock-problem/src/cutstock.py)         | GAMS control API |
 | 2 | Traveling Salesman | [https://gamspy-tsp.streamlit.app/](https://gamspy-tsp.streamlit.app/)             | [tsp.py](./traveling-salesman-problem/src/tsp.py)                 | GAMSPy           |
 | 3 | Transportation     | [https://gamspy-transport.streamlit.app/](https://gamspy-transport.streamlit.app/) | [transport.py](./transportation-problem/src/transport.py) | GAMSPy           |
+
+
